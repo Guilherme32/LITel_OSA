@@ -2,15 +2,6 @@ import json
 
 import process_spectra as ps
 
-# defaults = {
-#     'output_file': 'info.csv',
-#     'graph_window': 50,
-#     'wl_range': (1.4e-6, 1.6e-6)
-# }
-#
-# with open('config.json', 'r') as config:
-#     opt_args = {**defaults, **json.load(config)}
-
 # Colors generated from this website
 # https://learnui.design/tools/data-color-picker.html
 colors = ['#003f5c',
