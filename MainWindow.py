@@ -1,14 +1,15 @@
 import pandas as pd
-from collections import defaultdict
 import json
 from time import time
 import os
+from PyQt6 import QtGui
 
 from PlotWidget import PlotWidget
 from Toolbar import WindowWithToolbar
 from Loader import FileLoader
 import processing
 from OptionsDialog import OptionsDialog, CONFIG_PATH, DEFAULT
+from Calibration import CalibrationWindow1
 
 
 class MainWindow(WindowWithToolbar):
@@ -16,6 +17,7 @@ class MainWindow(WindowWithToolbar):
         super().__init__()
 
         self.setWindowTitle("LITel OSA")
+        self.setWindowIcon(QtGui.QIcon('assets/window_icon.png'))
 
         self.plot_widget = PlotWidget()
         self.setCentralWidget(self.plot_widget)
@@ -35,6 +37,11 @@ class MainWindow(WindowWithToolbar):
         dialog = OptionsDialog(self)
         dialog.exec()
         self.on_change_options()
+
+    def open_calibration(self):
+        dialog = CalibrationWindow1(self)
+        dialog.exec()
+        print("Fechou calibração")
 
     def on_change_options(self):
         self.load_options()

@@ -20,5 +20,14 @@ class WindowWithToolbar(QMainWindow):
         config.setShortcut(QKeySequence("Ctrl+p"))
         toolbar.addAction(config)
 
+        calibrate = QAction(QIcon("assets/thermometer--pencil.png"),
+                            "C&alibrar", self)
+        calibrate.triggered.connect(self.open_calibration)
+        calibrate.setShortcut(QKeySequence("Ctrl+l"))
+        toolbar.addAction(calibrate)
+
     def open_config(self):
+        pass
+
+    def open_calibration(self):
         pass

@@ -27,16 +27,13 @@ class FileLoader(PatternMatchingEventHandler, Observer):
     def reset_config(self, load_callback=None, path=None):
         self.next = None
         self.ready = False
-        self.stop()
         self.unschedule_all()
-        self.join()
 
         self.load_callback = load_callback or self.load_callback
         self.path = path or self.path
 
         if os.path.exists(self.path):
             self.schedule(self, path=self.path)
-            self.start()
         else:
             print('Caminho não encontrado, por favor atualize')
 
