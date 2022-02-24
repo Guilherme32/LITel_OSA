@@ -6,6 +6,6 @@ Até o dado momento, o programa funciona lendo arquivos em uma determinada pasta
 
 ## Rodando o programa
 Para rodar o programa, basta:
-- Instalar os requerimentos (pip install -r requirementes.txt)
+- Instalar os requerimentos (pip install -r requirements.txt)
 - Rodar o main.py
 - Colocar as configurações adequadas
