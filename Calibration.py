@@ -93,6 +93,9 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.delete_model.setIcon(QIcon("assets/cross.png"))
         self.next.setIcon(QIcon("assets/arrow.png"))
 
+        # Pro foco não começar no de deletar
+        self.next.setFocus()
+
     def reset_options(self):
         self.options = [file[:-5] for file in os.listdir(MODELS_PATH)
                         if file[-5:] == ".json"] +\
@@ -125,9 +128,7 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
 
     @current_option.setter
     def current_option(self, new_option):
-        if self.current_option["name"] != "":
-            self.save_current()
-
+        self.save_current()
         self._current_option = new_option
 
     @property
@@ -157,6 +158,9 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.comboBox.setCurrentText(name)
 
     def save_current(self):
+        # Se n tem nome, n tem o q salvar
+        if self.current_option["name"] == "":
+            return -1
         # Se n existe, já foi deletado, n deve ser salvo
         if not os.path.exists(self.current_path):
             return -1
@@ -240,5 +244,5 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.current_option["unit"] = self.unit.text()
 
     def closeEvent(self, event):
-        self.comboBox.setCurrentIndex(-1)
+        self.save_current()
         event.accept()
