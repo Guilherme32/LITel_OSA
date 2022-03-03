@@ -24,7 +24,7 @@ def move_files(sender, recipient, T=0):
 
 def exit():
 	print(f'finished... \nReturning files...')
-	time.sleep(1)
+	time.sleep(5)
 	move_files(to_path, from_path)
 
 from_path = 'test_data/from/'
