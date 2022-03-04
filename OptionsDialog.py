@@ -17,6 +17,10 @@ DEFAULT = {'out_file': 'out.csv',
            'prominence': 5,
            'valley_width': 100}
 
+# TODO adicionar opções:
+# Amostras por passo - "samples_per_step"
+# Amostras utilizadas (em %) - "use_samples"
+
 
 class OptionsDialog(Ui_OptionsDialog, QDialog):
 

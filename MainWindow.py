@@ -9,7 +9,8 @@ from Toolbar import WindowWithToolbar
 from Loader import FileLoader
 import processing
 from OptionsDialog import OptionsDialog, CONFIG_PATH, DEFAULT
-from Calibration import CalibrationWindow1
+from Calibration1 import CalibrationWindow1
+from Calibration2 import CalibrationWindow2, LAST_MODEL
 
 
 class MainWindow(WindowWithToolbar):
@@ -30,8 +31,14 @@ class MainWindow(WindowWithToolbar):
         self.options = {}
         self.load_options()
 
-        self.loader = FileLoader(self.entry_loaded, 
+        self.loader = FileLoader(self.entry_loaded,
                                  path=self.options['spectra_path'])
+
+        if os.path.exists(LAST_MODEL):
+            with open(LAST_MODEL, "r") as file:
+                self.last_calibrated = json.load(file)
+        else:
+            self.last_calibrated = None
 
     def open_config(self):
         dialog = OptionsDialog(self)
@@ -39,9 +46,17 @@ class MainWindow(WindowWithToolbar):
         self.on_change_options()
 
     def open_calibration(self):
+        self.loader.pause()
+
         dialog = CalibrationWindow1(self)
         dialog.exec()
-        print("Fechou calibração")
+
+        if dialog.close_reason != "close":
+            calibration_model = dialog.current_option
+            dialog = CalibrationWindow2(calibration_model, self.options, self)
+            dialog.exec()
+
+        self.loader.resume()
 
     def on_change_options(self):
         self.load_options()
@@ -53,13 +68,22 @@ class MainWindow(WindowWithToolbar):
                 self.options = json.load(file)
         else:
             self.options = DEFAULT
-    
+
     def entry_loaded(self, spectrum):
         print('.', end='')
-        spectrum, info = processing.process(spectrum, self.options)
+
+        if self.last_calibrated:
+            a = self.last_calibrated["last_calibration"]["a"]
+            b = self.last_calibrated["last_calibration"]["b"]
+            function = lambda x: a * x + b
+        else:
+            function = lambda x: x
+
+        spectrum, info = processing.process(spectrum, self.options, function=function)
         info['time'] = time() - self.start_time
 
-        self.spectra_info = self.spectra_info.append(info, ignore_index=True)
+        info['index'] = 0
+        self.spectra_info = pd.concat([self.spectra_info, pd.DataFrame([info,])], ignore_index=True)
         # self.spectra_info = processing.reorganize_valleys(self.spectra_info)
 
         processing.plot(spectrum,

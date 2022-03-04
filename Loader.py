@@ -39,6 +39,12 @@ class FileLoader(PatternMatchingEventHandler, Observer):
 
         self.set_ready()
 
+    def pause(self):
+        self.unschedule_all()
+
+    def resume(self):
+        self.reset_config()
+
     def set_ready(self):
         self.ready = True
         self.try_send()

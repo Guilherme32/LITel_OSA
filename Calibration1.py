@@ -21,7 +21,7 @@ class StepText(QHBoxLayout):
         self.addItem(self.spacer_left)
 
         self.label = QLabel(parent)
-        self.label.setText(f"{index}")
+        self.label.setText(f"{index+1}")
         self.addWidget(self.label)
 
         self.value = QDoubleSpinBox(parent)
@@ -53,6 +53,7 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
                      "steps": [],
                      "last_calibration": {"a": 1,
                                           "b": 0,
+                                          "R2": -1,
                                           "MAE": -1,
                                           "RMSE": -1
                                           }
@@ -75,6 +76,7 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.parameter.textChanged.connect(self.update_parameter)
         self.unit.textChanged.connect(self.update_unit)
         self.delete_model.clicked.connect(self.delete_current)
+        self.next.clicked.connect(self.next_clicked)
 
         self.new_step_btn = QPushButton(self)
         self.new_step_btn.setEnabled(True)
@@ -95,6 +97,9 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
 
         # Pro foco não começar no de deletar
         self.next.setFocus()
+
+        # Para passar a informação de saída quando fechar
+        self.close_reason = "close"
 
     def reset_options(self):
         self.options = [file[:-5] for file in os.listdir(MODELS_PATH)
@@ -242,6 +247,21 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
     # Callback de input
     def update_unit(self):
         self.current_option["unit"] = self.unit.text()
+
+    # Callback de botão
+    def next_clicked(self):
+        if len(self.current_option["steps"]) == 0:
+            dialog = QMessageBox(self)
+            dialog.setIcon(QMessageBox.Icon.Critical)
+            dialog.setText("Erro")
+            dialog.setInformativeText("Não pode passar para a próxima " +
+                                      "fase sem passos no modelo")
+            dialog.setWindowTitle("Erro")
+            dialog.exec()
+            return
+
+        self.close_reason = "next"
+        self.close()
 
     def closeEvent(self, event):
         self.save_current()
