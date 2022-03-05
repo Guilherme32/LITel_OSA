@@ -91,4 +91,5 @@ class MainWindow(WindowWithToolbar):
                         self.spectra_info,
                         self.options)
 
+        self.plot_widget.add_text()
         self.plot_widget.canvas.figure.canvas.draw()
