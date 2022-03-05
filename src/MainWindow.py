@@ -18,7 +18,7 @@ class MainWindow(WindowWithToolbar):
         super().__init__()
 
         self.setWindowTitle("LITel OSA")
-        self.setWindowIcon(QtGui.QIcon('assets/window_icon.png'))
+        self.setWindowIcon(QtGui.QIcon('../assets/window_icon.png'))
 
         self.plot_widget = PlotWidget()
         self.setCentralWidget(self.plot_widget)

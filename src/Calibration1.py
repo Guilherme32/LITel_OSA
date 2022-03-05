@@ -81,7 +81,7 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.new_step_btn = QPushButton(self)
         self.new_step_btn.setEnabled(True)
         self.new_step_btn.setText("")
-        self.new_step_btn.setIcon(QIcon("assets/plus.png"))
+        self.new_step_btn.setIcon(QIcon("../assets/plus.png"))
         self.new_step_btn.clicked.connect(self.create_step)
         self.new_step_btn.hide()
 
@@ -92,8 +92,8 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
 
         # Esses botões não ficaram com os ícones bem configurados do .ui
 
-        self.delete_model.setIcon(QIcon("assets/cross.png"))
-        self.next.setIcon(QIcon("assets/arrow.png"))
+        self.delete_model.setIcon(QIcon("../assets/cross.png"))
+        self.next.setIcon(QIcon("../assets/arrow.png"))
 
         # Pro foco não começar no de deletar
         self.next.setFocus()
@@ -199,7 +199,7 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.unit.setText(self.current_option["unit"])
         
         # passos
-        icon = QIcon("assets/cross.png")
+        icon = QIcon("../assets/cross.png")
         for c, step_value in enumerate(self.current_option["steps"]):
             new_step = StepText(c, step_value, icon, self)
 

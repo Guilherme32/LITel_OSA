@@ -15,12 +15,12 @@ class WindowWithToolbar(QMainWindow):
         toolbar.setIconSize(QSize(16, 16))
         self.addToolBar(toolbar)
 
-        config = QAction(QIcon("assets/gear.png"), "&Configurações", self)
+        config = QAction(QIcon("../assets/gear.png"), "&Configurações", self)
         config.triggered.connect(self.open_config)
         config.setShortcut(QKeySequence("Ctrl+p"))
         toolbar.addAction(config)
 
-        calibrate = QAction(QIcon("assets/thermometer--pencil.png"),
+        calibrate = QAction(QIcon("../assets/thermometer--pencil.png"),
                             "C&alibrar", self)
         calibrate.triggered.connect(self.open_calibration)
         calibrate.setShortcut(QKeySequence("Ctrl+l"))
