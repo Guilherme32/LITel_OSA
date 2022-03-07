@@ -35,12 +35,20 @@ class PlotWidget(QWidget):
     def refit(self):
         self.canvas.figure.tight_layout()
 
-    def add_text(self):
-        self.axs[0].set_xlabel('tempo (s)')
-        self.axs[0].set_ylabel(r'mensurando')
-
+    def add_text_base(self):
         self.axs[1].set_xlabel(r'comprimento de onda $\lambda$ ($\mu m$)')
         self.axs[1].set_ylabel(r'potência (dBW)')
 
         self.axs[2].set_xlabel('tempo (s)')
         self.axs[2].set_ylabel(r'$\lambda_{res}$ ($\mu m$)')
+
+    def add_text(self):
+        self.add_text_base()
+        self.axs[0].set_xlabel('tempo (s)')
+        self.axs[0].set_ylabel(r'mensurando')
+
+    def add_text_calibration(self):
+        self.add_text_base()
+        self.axs[0].set_xlabel(r'comprimento de onda $\lambda$ ($\mu m$)')
+        self.axs[0].set_ylabel(r'mensurando')
+

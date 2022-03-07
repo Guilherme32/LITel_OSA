@@ -12,8 +12,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_CalibrationWindow2(object):
     def setupUi(self, CalibrationWindow2):
         CalibrationWindow2.setObjectName("CalibrationWindow2")
-        CalibrationWindow2.resize(411, 181)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        CalibrationWindow2.resize(727, 664)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(CalibrationWindow2.sizePolicy().hasHeightForWidth())

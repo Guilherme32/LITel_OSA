@@ -37,7 +37,9 @@ def process(spectrum, opts: dict, function=None):
 
     info = {**info, **_info}
     best_index = int(info['best_index'])
-    info['measurand'] = function(info[f'resonant_wl_{best_index}'])
+    info['best_wl'] = info[f'resonant_wl_{best_index}']
+    info['best_wl_power'] = info[f'resonant_wl_power_{best_index}']
+    info['measurand'] = function(info[f'best_wl'])
 
     return spectrum, info
 
@@ -122,21 +124,21 @@ def reorganize_valleys(info):
     return info
 
 
-def plot(spectrum, axs, info, opts: dict):
+def plot_base(spectrum, axs, info, opts: dict):
     for ax in axs:
         ax.clear()
 
     if len(info) > opts['graph_window']:
         info = info.iloc[-opts['graph_window']:]
 
-    axs[1].plot(spectrum[::, 0], spectrum[::, 1], color='black')
+    axs[1].plot(spectrum[::, 0]*1e6, spectrum[::, 1], color='black')
 
     valleys = len([x for x in info.columns if 'resonant_wl_power' in x])
     best_valley = int(info['best_index'].iloc[-1])
 
     for i in range(valleys):
         markerwidth = 3 if i == best_valley else 2
-        axs[1].plot(info[f'resonant_wl_{i}'].iloc[-1],
+        axs[1].plot(info[f'resonant_wl_{i}'].iloc[-1]*1e6,
                     info[f'resonant_wl_power_{i}'].iloc[-1],
                     'x',
                     markeredgewidth=markerwidth,
@@ -144,14 +146,32 @@ def plot(spectrum, axs, info, opts: dict):
                     color=colors[i])
     for i in range(valleys):
         axs[2].plot(info['time'],
-                    info[f'resonant_wl_{i}'],
+                    info[f'resonant_wl_{i}']*1e6,
                     'o-',
                     color=colors[i])
 
     # axs[2].plot(info['time'], info[f'resonant_wl_{best_valley}'], 'o-',
     #             color=colors[0])
 
+
+def plot(spectrum, axs, info, opts: dict):
+    plot_base(spectrum, axs, info, opts)
+
     axs[0].plot(info['time'], info['measurand'], 'o-', color='black')
 
+def plot_calibration(spectrum, axs, info, opts: dict, regression):
+    plot_base(spectrum, axs, info, opts)
 
+    non_outliers = info[~info['outlier']]
+    outliers = info[info['outlier']]
+
+    axs[0].plot(non_outliers['best_wl']*1e6, non_outliers['measurand'],
+                'o', color='black')
+    axs[0].plot(outliers['best_wl']*1e6, outliers['measurand'],
+                'o', color='red')
+
+    if regression:
+        limits = np.array(axs[0].get_xlim()).reshape(-1, 1) # limites em um
+        axs[0].plot(limits, regression.predict(limits*1e-6), '--', color='blue')
+        axs[0].set_xlim(limits)
 

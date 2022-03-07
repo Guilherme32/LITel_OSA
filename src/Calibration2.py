@@ -12,6 +12,7 @@ import processing
 from time import time
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from PlotWidget import PlotWidget
 
 
 MODELS_PATH = os.path.join(os.getenv("APPDATA"), "litel_osa", "calibration")
@@ -32,6 +33,12 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         self.current_step = 0
         self.reset_info()
 
+        # plot
+        self.plot_widget = PlotWidget()
+        self.verticalLayout.addWidget(self.plot_widget)
+        self.plot_widget.refit()
+        self.plot_widget.add_text_calibration()
+
         # Parte do loader
         self.loader = FileLoader(self.entry_loaded, options["spectra_path"])
         self.loader.pause()
@@ -39,12 +46,11 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         # Carregando opções
         self.options = options
         self.n_samples = options.get("samples_per_step", 10)
-        self.use_samples = ceil(self.n_samples * options.get("use_samples", 0.75))
 
         # outras inicializações
         self.update_trigger.connect(self.update_entry)
         self.spectra_info = pd.DataFrame()
-        self.start_time = 0
+        self.start_time = time()
         self.running = False
 
         # Mensagem de início
@@ -86,6 +92,10 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
         return text
 
+    @property
+    def current_sub_df(self):
+        return self.spectra_info.loc[self.spectra_info["step"] == self.current_step]
+
     def finish_step(self):
         self.running = False
         self.loader.pause()
@@ -98,46 +108,20 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
     @QtCore.pyqtSlot()
     def end_calibration(self):
-        valleys = []
-        values = []
+        regression, X, y = self.fit(return_params=True)
+        r2 = regression.score(X, y)
 
-        # Organizando os valores
-        for i in range(len(self.calibration_model["steps"])):
-            df = self.spectra_info.loc[self.spectra_info["step"] == i]
+        predictions = regression.predict(X)
+        mae = mean_absolute_error(y, predictions)
+        rmse = mean_squared_error(y, predictions)**(1/2)
 
-            # Com function=None no process, measurando é o vale ressonante 'principal'
-            df = df.sort_values(by=["measurand"])
-
-            median = self.n_samples//2
-            df = df.iloc[median - self.use_samples//2:
-                         median + ceil(self.use_samples/2)]
-
-            valleys += list(df["measurand"])
-            # len(df.index) deve ser igual a self.use_samples, mas assim garante se não for
-            values += [self.calibration_model["steps"][i] for _ in df.index]
-
-        valleys = np.array(valleys).reshape(-1, 1)
-
-        regression = LinearRegression().fit(valleys, values)
-        r2 = regression.score(valleys, values)
-
-        predictions = regression.predict(valleys)
-        mae = mean_absolute_error(values, predictions)
-        rmse = mean_squared_error(values, predictions)**(1/2)
-
-        # Salvando
         self.calibration_model["last_calibration"]["a"] = regression.coef_[0]
         self.calibration_model["last_calibration"]["b"] = regression.intercept_
         self.calibration_model["last_calibration"]["R2"] = r2
         self.calibration_model["last_calibration"]["MAE"] = mae
         self.calibration_model["last_calibration"]["RMSE"] = rmse
 
-        path = os.path.join(MODELS_PATH, self.calibration_model["name"] + ".json")
-        with open(path, "w") as file:
-            json.dump(self.calibration_model, file)
-
-        with open(LAST_MODEL, "w") as file:
-            json.dump(self.calibration_model, file)
+        self.save()
 
         # Mensagem de saída
         dialog = QMessageBox(self)
@@ -152,6 +136,14 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
         dialog.exec()
         self.close()
+
+    def save(self):
+        path = os.path.join(MODELS_PATH, self.calibration_model["name"] + ".json")
+        with open(path, "w") as file:
+            json.dump(self.calibration_model, file)
+
+        with open(LAST_MODEL, "w") as file:
+            json.dump(self.calibration_model, file)
 
     @QtCore.pyqtSlot()
     def next_step(self):
@@ -183,18 +175,74 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         spectrum, info = processing.process(spectrum, self.options, function=None)
         info["time"] = time() - self.start_time
         info["step"] = self.current_step
+        info["measurand"] = self.calibration_model["steps"][self.current_step]
+        info["outlier"] = False
 
         self.spectra_info = pd.concat([self.spectra_info, pd.DataFrame([info, ])], ignore_index=True)
-        # self.spectra_info = processing.reorganize_valleys(self.spectra_info)
+
+        self.mark_outliers()
+        regression_model = self.fit()
+
+        processing.plot_calibration(spectrum,
+                        self.plot_widget.axs,
+                        self.spectra_info,
+                        self.options,
+                        regression_model)
+
+        self.plot_widget.add_text_calibration()
+        self.plot_widget.canvas.figure.canvas.draw()
 
         self.update_trigger.emit()
 
     def update_entry(self):
         # Conferindo e atualiando a quantidade de amostras
-        sub_df = self.spectra_info.loc[self.spectra_info["step"] == self.current_step]
+        sub_df = self.current_sub_df
         samples_taken = len(sub_df.index)
 
         self.progressBar.setValue(100*samples_taken//self.n_samples)
 
         if samples_taken >= self.n_samples:
             self.finish_step()
+
+    def mark_outliers(self):
+        """Removendo com o método iqr"""
+
+        sub_df = self.current_sub_df
+        if len(sub_df.index) < 5:
+            return None
+
+        q1 = self.current_sub_df["best_wl"].quantile(0.25)
+        q3 = self.current_sub_df["best_wl"].quantile(0.75)
+        iqr = q3 - q1
+
+        lims = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+
+        mask = (sub_df["best_wl"] < lims[0]) | (sub_df["best_wl"] > lims[1])
+        out_index = sub_df[mask].index
+        not_out_index = sub_df[~mask].index
+
+        self.spectra_info.loc[out_index, "outlier"] = True
+        self.spectra_info.loc[not_out_index, "outlier"] = False
+
+    def fit(self, return_params=False):
+        if self.current_step == 0:
+            return None
+
+        model = LinearRegression()
+
+        sub_df = self.spectra_info[~self.spectra_info["outlier"]]
+        X = np.array(sub_df["best_wl"]).reshape(-1, 1)
+        y = sub_df["measurand"]
+
+        model.fit(X, y)
+
+        if return_params:
+            return model, X, y
+
+        return model
+
+    def closeEvent(self, event):
+        self.running = False
+        self.loader.pause()
+
+        event.accept()
