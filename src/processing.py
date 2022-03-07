@@ -167,8 +167,9 @@ def plot_calibration(spectrum, axs, info, opts: dict, regression):
 
     axs[0].plot(non_outliers['best_wl']*1e6, non_outliers['measurand'],
                 'o', color='black')
-    axs[0].plot(outliers['best_wl']*1e6, outliers['measurand'],
-                'o', color='red')
+    # axs[0].plot(outliers['best_wl']*1e6, outliers['measurand'],
+    #             'o', color='red')
+    # Descomentar para printar outliers em vermelho
 
     if regression:
         limits = np.array(axs[0].get_xlim()).reshape(-1, 1) # limites em um
