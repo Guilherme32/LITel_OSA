@@ -6,7 +6,8 @@ from PyQt6.QtWidgets import (
 )
 import os
 
-from MainWindow import MainWindow, CONFIG_PATH
+from MainWindow import MainWindow
+from Definitions import CONFIG_PATH
 
 if not os.path.isdir(os.path.dirname(CONFIG_PATH)):
     os.mkdir(os.path.dirname(CONFIG_PATH))

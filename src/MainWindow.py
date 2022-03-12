@@ -8,9 +8,11 @@ from PlotWidget import PlotWidget
 from Toolbar import WindowWithToolbar
 from Loader import FileLoader
 import processing
-from OptionsDialog import OptionsDialog, CONFIG_PATH, DEFAULT
+from OptionsDialog import OptionsDialog
 from Calibration1 import CalibrationWindow1
-from Calibration2 import CalibrationWindow2, LAST_MODEL
+from Calibration2 import CalibrationWindow2
+
+from Definitions import LAST_MODEL, CONFIG_PATH, DEFAULT_OPTIONS
 
 
 class MainWindow(WindowWithToolbar):
@@ -67,7 +69,7 @@ class MainWindow(WindowWithToolbar):
             with open(CONFIG_PATH, 'r') as file:
                 self.options = json.load(file)
         else:
-            self.options = DEFAULT
+            self.options = DEFAULT_OPTIONS
 
     def entry_loaded(self, spectrum):
         print('.', end='')
