@@ -157,6 +157,8 @@ def plot_base(spectrum, axs, info, opts: dict):
 def plot(spectrum, axs, info, opts: dict):
     plot_base(spectrum, axs, info, opts)
 
+    if len(info) > opts['graph_window']:
+        info = info.iloc[-opts['graph_window']:]
     axs[0].plot(info['time'], info['measurand'], 'o-', color='black')
 
 def plot_calibration(spectrum, axs, info, opts: dict, regression, ref_wl,
