@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import (QSpacerItem, QSizePolicy, QDoubleSpinBox,
                              QPushButton, QDialog, QInputDialog,
-                             QLabel, QMessageBox, QFileDialog, QHBoxLayout)
+                             QLabel, QMessageBox, QRadioButton, QHBoxLayout)
 from PyQt6.QtGui import QIcon
 from creator.calibrate_1 import Ui_CalibrationWindow1
 import json
@@ -175,8 +175,8 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
 
     def clear_steps(self):
         # parâmetro e unidade
-        self.parameter.setText("")
-        self.unit.setText("")
+        self.parameter.setText(self.current_option["parameter"])
+        self.unit.setText(self.current_option["unit"])
 
         # passos
         for step in self.steps:
@@ -193,10 +193,6 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         self.clear_steps()
         if self.current_option["name"] == "":
             return
-        
-        # parâmetro e unidade
-        self.parameter.setText(self.current_option["parameter"])
-        self.unit.setText(self.current_option["unit"])
         
         # passos
         icon = QIcon("../assets/cross.png")
