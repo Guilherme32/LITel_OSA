@@ -6,16 +6,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QPushButton,
 from creator.options import Ui_OptionsDialog
 import json
 
+from Definitions import CONFIG_PATH, DEFAULT_OPTIONS
 
-CONFIG_PATH = os.path.join(os.getenv('APPDATA'), 'litel_osa', 'config.json')
-DEFAULT = {'out_file': 'out.csv',
-           'batch_size': 50,
-           'spectra_path': './spectra',
-           'wl_range': [1.5e-6, 1.6e-6],
-           'mov_mean': 5,
-           'graph_window': 100,
-           'prominence': 5,
-           'valley_width': 100}
 
 # TODO adicionar opções:
 # Amostras por passo - "samples_per_step"
@@ -51,7 +43,7 @@ class OptionsDialog(Ui_OptionsDialog, QDialog):
 
     def load(self):
         if not os.path.exists(CONFIG_PATH):
-            config = DEFAULT
+            config = DEFAULT_OPTIONS
         else:
             with open(CONFIG_PATH, 'r') as file:
                 config = json.load(file)
@@ -70,7 +62,7 @@ class OptionsDialog(Ui_OptionsDialog, QDialog):
         self.valley_width.setValue(config['valley_width'])
 
     def reset(self):
-        config = DEFAULT
+        config = DEFAULT_OPTIONS
 
         self.out_file.setText(config['out_file'])
         self.batch_size.setValue(config['batch_size'])

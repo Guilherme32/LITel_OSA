@@ -14,9 +14,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from PlotWidget import PlotWidget
 
+from Definitions import MODELS_PATH, LAST_MODEL
 
-MODELS_PATH = os.path.join(os.getenv("APPDATA"), "litel_osa", "calibration")
-LAST_MODEL = os.path.join(os.getenv("APPDATA"), "litel_osa", "last_calibrated.json")
 
 
 class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):

@@ -8,8 +8,7 @@ from creator.calibrate_1 import Ui_CalibrationWindow1
 import json
 from copy import deepcopy
 
-
-MODELS_PATH = os.path.join(os.getenv('APPDATA'), 'litel_osa', 'calibration')
+from Definitions import MODELS_PATH
 
 
 class StepText(QHBoxLayout):
