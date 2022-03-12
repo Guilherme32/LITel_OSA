@@ -159,21 +159,26 @@ def plot(spectrum, axs, info, opts: dict):
 
     axs[0].plot(info['time'], info['measurand'], 'o-', color='black')
 
-def plot_calibration(spectrum, axs, info, opts: dict, regression):
+def plot_calibration(spectrum, axs, info, opts: dict, regression, ref_wl,
+                     ref_measurand):
     plot_base(spectrum, axs, info, opts)
 
     non_outliers = info[~info['outlier']]
     outliers = info[info['outlier']]
+    reference = info[info["measurand"] == ref_measurand]
+    non_reference = info[info["measurand"] != ref_measurand]
 
-    axs[0].plot(non_outliers['best_wl']*1e6, non_outliers['measurand'],
+    axs[0].plot(non_reference['best_wl']*1e6, non_reference['measurand'],
                 'o', color='black')
+    axs[0].plot(reference['best_wl'] * 1e6, reference['measurand'],
+                'o', color='blue')          # pontos de referência em azul
     # axs[0].plot(outliers['best_wl']*1e6, outliers['measurand'],
     #             'o', color='red')
     # Descomentar para printar outliers em vermelho
 
     if regression:
         limits = np.array(axs[0].get_xlim()).reshape(-1, 1) # limites em um
-        axs[0].plot(limits, regression.predict(limits*1e-6), '--', color='blue')
+        axs[0].plot(limits, regression.predict((limits) * 1e-6 - ref_wl), '--', color='blue')
         axs[0].set_xlim(limits)
 
 def plot_only_spectrum(spectrum, axs, info, opts):

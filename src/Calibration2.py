@@ -97,6 +97,14 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
     def current_sub_df(self):
         return self.spectra_info.loc[self.spectra_info["step"] == self.current_step]
 
+    @property
+    def reference_wl(self):
+        return self.calibration_model["last_calibration"]["ref"]
+
+    @property
+    def reference_measurand(self):
+        return self.calibration_model["steps"][self.calibration_model["base"]]
+
     def finish_step(self):
         self.running = False
         # self.loader.pause()
@@ -109,6 +117,8 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
     @QtCore.pyqtSlot()
     def end_calibration(self):
+        self.loader.pause()
+
         regression, X, y = self.fit(return_params=True)
         r2 = regression.score(X, y)
 
@@ -180,13 +190,16 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
             self.spectra_info = pd.concat([self.spectra_info, pd.DataFrame([info, ])], ignore_index=True)
 
             self.mark_outliers()
+            self.get_reference()
             regression_model = self.fit()
 
             processing.plot_calibration(spectrum,
-                            self.plot_widget.axs,
-                            self.spectra_info,
-                            self.options,
-                            regression_model)
+                                        self.plot_widget.axs,
+                                        self.spectra_info,
+                                        self.options,
+                                        regression_model,
+                                        self.reference_wl,
+                                        self.reference_measurand)
         else:
             processing.plot_only_spectrum(spectrum, self.plot_widget.axs,
                                           info, self.options)
@@ -226,13 +239,32 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         self.spectra_info.loc[out_index, "outlier"] = True
         self.spectra_info.loc[not_out_index, "outlier"] = False
 
+    def get_reference(self):
+        sub_df = self.spectra_info[(self.spectra_info["measurand"] ==
+                                   self.reference_measurand) &
+                                   ~self.spectra_info["outlier"]]
+
+        if len(sub_df) >= 1:
+            self.calibration_model["last_calibration"]["ref"] = \
+                sub_df["best_wl"].mean()
+        else:
+            self.calibration_model["last_calibration"]["ref"] = 0
+
     def fit(self, return_params=False):
-        if self.current_step == 0:
-            return None
+        # Só faz o fit se já tiver amostras o suficiente
+        # Só usa valores diferentes da base para fitar também
+
+        sub_df = self.spectra_info[self.spectra_info["measurand"] !=
+                                   self.reference_measurand]
+        if len(sub_df.index) <= self.n_samples:
+            return
 
         model = LinearRegression()
 
-        sub_df = self.spectra_info[~self.spectra_info["outlier"]]
+        sub_df = sub_df[~self.spectra_info["outlier"]]
+
+        sub_df.loc[:, ["best_wl", ]] -= self.reference_wl
+
         X = np.array(sub_df["best_wl"]).reshape(-1, 1)
         y = sub_df["measurand"]
 

@@ -34,6 +34,11 @@ class StepText(QHBoxLayout):
         self.delete_step_btn.setIcon(icon)
         self.addWidget(self.delete_step_btn)
 
+        self.radio = QRadioButton(parent)
+        self.radio.setToolTip("Marcar como referência. Todos com mesmo valor"
+                              " também serão referência")
+        self.addWidget(self.radio)
+
         self.spacer_right = QSpacerItem(8, 16, QSizePolicy.Policy.Fixed,
                                         QSizePolicy.Policy.Minimum)
 
@@ -51,7 +56,9 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
                      "parameter": "",
                      "unit": "",
                      "steps": [],
-                     "last_calibration": {"a": 1,
+                     "base": 0,
+                     "last_calibration": {"ref": 0,
+                                          "a": 1,
                                           "b": 0,
                                           "R2": -1,
                                           "MAE": -1,
@@ -199,9 +206,13 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
         for c, step_value in enumerate(self.current_option["steps"]):
             new_step = StepText(c, step_value, icon, self)
 
+            if c == self.current_option["base"]:
+                new_step.radio.setChecked(True)
+
             # O lambda dessa forma é para poder passar o valor, não a referência
             new_step.delete_step_btn.clicked.connect(lambda *, n=c: self.delete_step(n))
             new_step.value.valueChanged.connect(lambda *, n=c: self.update_step(n))
+            new_step.radio.toggled.connect(lambda *, n=c: self.update_base(n))
 
             self.steps.append(new_step)
 
@@ -235,6 +246,9 @@ class CalibrationWindow1(Ui_CalibrationWindow1, QDialog):
     # Callback de input
     def update_step(self, index):
         self.current_option["steps"][index] = self.steps[index].value.value()
+
+    def update_base(self, index):
+        self.current_option["base"] = index
 
     # Callback de input
     def update_parameter(self):

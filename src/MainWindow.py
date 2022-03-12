@@ -75,7 +75,8 @@ class MainWindow(WindowWithToolbar):
         if self.last_calibrated:
             a = self.last_calibrated["last_calibration"]["a"]
             b = self.last_calibrated["last_calibration"]["b"]
-            function = lambda x: a * x + b
+            reference = self.last_calibrated["last_calibration"]["ref"]
+            function = lambda x: a * (x - reference) + b
         else:
             function = lambda x: x
 
