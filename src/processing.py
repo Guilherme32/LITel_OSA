@@ -176,3 +176,19 @@ def plot_calibration(spectrum, axs, info, opts: dict, regression):
         axs[0].plot(limits, regression.predict(limits*1e-6), '--', color='blue')
         axs[0].set_xlim(limits)
 
+def plot_only_spectrum(spectrum, axs, info, opts):
+    axs[1].clear()
+
+    axs[1].plot(spectrum[::, 0]*1e6, spectrum[::, 1], color='black')
+
+    valleys = len([x for x in info.keys() if 'resonant_wl_power' in x])
+    best_valley = int(info['best_index'])
+
+    for i in range(valleys):
+        markerwidth = 3 if i == best_valley else 2
+        axs[1].plot(info[f'resonant_wl_{i}']*1e6,
+                    info[f'resonant_wl_power_{i}'],
+                    'x',
+                    markeredgewidth=markerwidth,
+                    markersize=7,
+                    color=colors[i])

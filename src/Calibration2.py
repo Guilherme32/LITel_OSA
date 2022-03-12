@@ -66,6 +66,7 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         dialog.exec()
 
         # Iniciando de fato o programa
+        self.loader.resume()
         self.start_step()
 
     def reset_info(self):
@@ -98,7 +99,7 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
     def finish_step(self):
         self.running = False
-        self.loader.pause()
+        # self.loader.pause()
 
         if self.current_step == (len(self.calibration_model["steps"]) - 1):
             self.end_calibration()
@@ -165,12 +166,9 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
 
     def start_step(self):
         self.running = True
-        self.loader.resume()
+        # self.loader.resume()
 
     def entry_loaded(self, spectrum):
-        if not self.running:
-            return
-
         # Extraindo informações
         spectrum, info = processing.process(spectrum, self.options, function=None)
         info["time"] = time() - self.start_time
@@ -178,16 +176,20 @@ class CalibrationWindow2(Ui_CalibrationWindow2, QDialog):
         info["measurand"] = self.calibration_model["steps"][self.current_step]
         info["outlier"] = False
 
-        self.spectra_info = pd.concat([self.spectra_info, pd.DataFrame([info, ])], ignore_index=True)
+        if self.running:
+            self.spectra_info = pd.concat([self.spectra_info, pd.DataFrame([info, ])], ignore_index=True)
 
-        self.mark_outliers()
-        regression_model = self.fit()
+            self.mark_outliers()
+            regression_model = self.fit()
 
-        processing.plot_calibration(spectrum,
-                        self.plot_widget.axs,
-                        self.spectra_info,
-                        self.options,
-                        regression_model)
+            processing.plot_calibration(spectrum,
+                            self.plot_widget.axs,
+                            self.spectra_info,
+                            self.options,
+                            regression_model)
+        else:
+            processing.plot_only_spectrum(spectrum, self.plot_widget.axs,
+                                          info, self.options)
 
         self.plot_widget.add_text_calibration()
         self.plot_widget.canvas.figure.canvas.draw()
