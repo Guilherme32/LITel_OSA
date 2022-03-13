@@ -57,7 +57,12 @@ class FileLoader(PatternMatchingEventHandler, Observer):
 
     def try_send(self):
         if self.ready and (self.next is not None):
-            spectrum = np.loadtxt(self.next, delimiter=';', dtype=np.float64)
+            try:
+                spectrum = np.loadtxt(self.next, delimiter=';', dtype=np.float64)
+            except PermissionError:
+                print(f"Não conseguiu abrir arquivo {self.next}. "
+                       f"Erro de permissão")
+                return
 
             if spectrum[0, 0] > 100:
                 spectrum[::, 0] *= 1e-9
