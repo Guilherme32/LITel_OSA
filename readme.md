@@ -9,3 +9,9 @@ Para rodar o programa, basta:
 - Instalar os requerimentos (pip install -r requirements.txt)
 - Rodar o main.py
 - Colocar as configurações adequadas
+
+### Features:
+- Calibração (botão com um termômetro):
+  - Permite calibrar o sensor usando um caminho determinado de passos. A calibração fica salva e o programa usa a última feita ao abrir
+- Dividir janela:
+  - Abre uma janela extra para cada vale localizado no espectro, e acompanha seus valores como se fossem o vale principal
