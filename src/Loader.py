@@ -63,6 +63,10 @@ class FileLoader(PatternMatchingEventHandler, Observer):
                 print(f"Não conseguiu abrir arquivo {self.next}. "
                        f"Erro de permissão")
                 return
+            except FileNotFoundError:
+                print(f"Não conseguiu abrir arquivo {self.next}. "
+                      f"Arquivo não encontrado")
+                return
 
             if spectrum[0, 0] > 100:
                 spectrum[::, 0] *= 1e-9
