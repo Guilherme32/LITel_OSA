@@ -1,5 +1,3 @@
-import json
-
 import process_spectra as ps
 
 # Colors generated from this website
@@ -132,6 +130,7 @@ def plot_base(spectrum, axs, info, opts: dict):
         info = info.iloc[-opts['graph_window']:]
 
     axs[1].plot(spectrum[::, 0]*1e6, spectrum[::, 1], color='black')
+    axs[1].set_xlim([x*1e6 for x in opts["wl_range"]])
 
     valleys = len([x for x in info.columns if 'resonant_wl_power' in x])
     best_valley = int(info['best_index'].iloc[-1])

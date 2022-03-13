@@ -26,8 +26,17 @@ class WindowWithToolbar(QMainWindow):
         calibrate.setShortcut(QKeySequence("Ctrl+l"))
         toolbar.addAction(calibrate)
 
+        split = QAction(QIcon("../assets/application-split-tile.png"),
+                        "&Dividir janela", self)
+        split.triggered.connect(self.split_window)
+        split.setShortcut(QKeySequence("Ctrl+d"))
+        toolbar.addAction(split)
+
     def open_config(self):
         pass
 
     def open_calibration(self):
+        pass
+
+    def split_window(self):
         pass
