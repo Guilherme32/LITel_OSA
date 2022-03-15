@@ -2,9 +2,9 @@ import process_spectra as ps
 
 # Colors generated from this website
 # https://learnui.design/tools/data-color-picker.html
-colors = ['#003f5c',
-          '#2f4b7c',
+colors = ['#2f4b7c',
           '#665191',
+          '#003f5c',
           '#a05195',
           '#d45087',
           '#f95d6a',
@@ -136,18 +136,31 @@ def plot_base(spectrum, axs, info, opts: dict):
     best_valley = int(info['best_index'].iloc[-1])
 
     for i in range(valleys):
+        # plotando o atual
         markerwidth = 3 if i == best_valley else 2
+
+        # plotando o trace
+        axs[1].plot(info[f'resonant_wl_{i}'].iloc[-5:-1] * 1e6,
+                    info[f'resonant_wl_power_{i}'].iloc[-5:-1],
+                    'x',
+                    markeredgewidth=markerwidth/2,
+                    markersize=5,
+                    color=colors[i],
+                    alpha=0.5)
+
         axs[1].plot(info[f'resonant_wl_{i}'].iloc[-1]*1e6,
                     info[f'resonant_wl_power_{i}'].iloc[-1],
                     'x',
                     markeredgewidth=markerwidth,
                     markersize=7,
                     color=colors[i])
+
     for i in range(valleys):
         axs[2].plot(info['time'],
-                    info[f'resonant_wl_{i}']*1e6,
+                    (info[f'resonant_wl_{i}'] - info[f'resonant_wl_{i}'].iloc[0])*1e6,
                     'o-',
-                    color=colors[i])
+                    color=colors[i],
+                    alpha=0.8)
 
     # axs[2].plot(info['time'], info[f'resonant_wl_{best_valley}'], 'o-',
     #             color=colors[0])

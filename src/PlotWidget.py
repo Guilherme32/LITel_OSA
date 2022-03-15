@@ -49,6 +49,6 @@ class PlotWidget(QWidget):
 
     def add_text_calibration(self):
         self.add_text_base()
-        self.axs[0].set_xlabel(r'comprimento de onda $\lambda$ ($\mu m$)')
+        self.axs[0].set_xlabel(r'$\delta\lambda$ ($\mu m$)')
         self.axs[0].set_ylabel(r'mensurando')
 
